@@ -1,0 +1,485 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<!-- External CSS & Icons -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.8.1/font/bootstrap-icons.min.css"
+/>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+/>
+
+<div class="px-3">
+  <!-- Welcome Header -->
+  <h3 class="fw-bold" style="color: orange;">Welcome, {{ request.user.username }}!</h3>
+
+  <!-- Dark Background Container (wraps text + referral link card) -->
+  <div class="bg-dark rounded p-2 mb-2" style="max-width: fit-content;">
+    <!-- Overview Text -->
+    <p class="text-white mb-2">
+      Here is a quick overview of your account.
+    </p>
+
+    <!-- Referral Link Card -->
+    <div class="card shadow-sm border-0" style="max-width: fit-content;">
+      <div class="card-body d-flex align-items-center gap-2 flex-wrap">
+        <!-- Icon & Label -->
+        <i class="fas fa-link"></i>
+        <strong>Your Referral Link:</strong>
+
+        <!-- Referral Link (wide enough) & Copy Button -->
+        <input
+          type="text"
+          class="form-control"
+          style="min-width: 300px;"
+          id="referralLink"
+          value="{{ referral_link }}"
+          readonly
+        />
+        <button class="btn btn-outline-primary" type="button" id="copyButton">
+          <i class="fas fa-copy"></i> Copy
+        </button>
+
+        <!-- Info Text -->
+        <span class="text-muted mb-0">
+          Invite friends, Earn Cash!
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById("copyButton").addEventListener("click", function () {
+    var copyText = document.getElementById("referralLink");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // For mobile devices
+    document.execCommand("copy");
+    alert("Referral link copied: " + copyText.value);
+  });
+</script>
+
+<!-- 2. Row of Statistic Cards (like "Projects", "Active Task", etc.) -->
+<div class="row g-3 px-3 mt-3">
+  <!-- Total Earnings -->
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 stats-card" style="background-color: #e3f2fd;">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-1 text-muted">
+          <i class="fas fa-university me-1"></i> Total Earnings
+        </h6>
+        <h4 class="card-title fw-bold">$ {{ user_profile.total_earnings }}</h4>
+        <p class="mb-0 text-success">
+          <a href="{% url 'earning_history' %}">
+            <small>view all time earnings together</small>
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- Withdrawals -->
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 stats-card" style="background-color: #ffebee;">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-1 text-muted">
+          <i class="fas fa-money-bill-wave me-1"></i> Withdrawals
+        </h6>
+        <h4 class="card-title fw-bold">$ {{ user_profile.total_withdrawals }}</h4>
+        <p class="mb-0 text-danger">
+          <small>all time withdrawals</small>
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- Expenses -->
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 stats-card" style="background-color: #f3e5f5;">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-1 text-muted">
+          <i class="fas fa-chart-line me-1"></i> Expenses
+        </h6>
+        <h4 class="card-title fw-bold">$ {{ user_profile.total_expenses }}</h4>
+        <p class="mb-0 text-muted">
+          <small>used to purchase products</small>
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- Balance -->
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 stats-card" style="background-color:rgb(89, 224, 101);">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-1 text-muted">
+          <i class="fas fa-wallet me-1"></i> Balance
+        </h6>
+        <h4 class="card-title fw-bold">$ {{ user_profile.balance }}</h4>
+        <p class="mb-0">
+          Available to
+          <a href="{% url 'withdraw' %}" class="text-danger">
+            <small> Withdraw</small>
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 3. Additional Bonuses (another row of stats-like cards) -->
+<div class="row g-3 px-3 mt-3">
+  <!-- Referral Earnings -->
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 stats-card" style="background-color: #fff3e0;">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-1 text-muted">
+          <i class="fas fa-user-friends me-1"></i> Referral Earnings
+        </h6>
+        <h4 class="card-title fw-bold">$ {{ user_profile.referral_earnings }}</h4>
+        <p class="mb-0 text-primary">
+          <small>Total earned from Direct and active referrals</small>
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- Retail Bonus -->
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 stats-card" style="background-color: #e0f7fa;">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-1 text-muted">
+          <i class="fas fa-shopping-cart me-1"></i> Retail Bonus
+        </h6>
+        <h4 class="card-title fw-bold">$ {{ user_profile.retail_bonus }}</h4>
+        <p class="mb-0 text-primary">
+          <small>Total earned from cashback and purchases</small>
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- Leadership Bonus -->
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 stats-card" style="background-color: #fce4ec;">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-1 text-muted">
+          <i class="fas fa-crown me-1"></i> Leadership Bonus
+        </h6>
+        <h4 class="card-title fw-bold">$ {{ user_profile.leadership_bonus }}</h4>
+        <p class="mb-0 text-primary">
+          <small>Total earned from ranks and achievements</small>
+        </p>
+      </div>
+    </div>
+  </div>
+  <!-- Matching Bonus -->
+  <div class="col-md-3">
+    <div class="card shadow-sm border-0 stats-card" style="background-color: #f1f8e9;">
+      <div class="card-body">
+        <h6 class="card-subtitle mb-1 text-muted">
+          <i class="fas fa-handshake me-1"></i> Matching Bonus
+        </h6>
+        <h4 class="card-title fw-bold">$ {{ user_profile.matching_bonus }}</h4>
+        <p class="mb-0 text-primary">
+          <small>Total earned matching pairs (left and right)</small>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 5. Network Overview & Account Insights (two columns) -->
+<div class="row g-3 px-3 mt-4">
+  <!-- Network Overview -->
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 stats-card" style="background-color: #f1f8e9;">
+      <div class="card-header bg-white fw-semibold">
+        <i class="fas fa-network-wired me-1"></i> Network Overview
+      </div>
+      <div class="card-body">
+        <table class="table table-borderless">
+          <tbody>
+            <tr>
+              <td>
+                <strong>
+                  <i class="fas fa-user-friends me-1 text-primary"></i> Direct Referrals:
+                </strong>
+              </td>
+              <td>
+                <span class="badge bg-primary">{{ direct_referrals_count }}</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>
+                  <i class="fas fa-arrow-left me-1 text-success"></i> Left Referral:
+                </strong>
+              </td>
+              <td>
+                <span class="badge bg-success">{{ left_total }}</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>
+                  <i class="fas fa-arrow-right me-1 text-danger"></i> Right Referral:
+                </strong>
+              </td>
+              <td>
+                <span class="badge bg-danger">{{ right_total }}</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>
+                  <i class="fas fa-users me-1 text-info"></i> Total Downlines:
+                </strong>
+              </td>
+              <td>
+                <span class="badge bg-info">{{ total_downlines }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- Account Insights -->
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0 stats-card" style="background-color: #e3f2fd;">
+      <div class="card-header bg-white fw-semibold">
+        <i class="fas fa-info-circle me-1"></i> Account Insights
+      </div>
+      <div class="card-body">
+        <table class="table table-borderless">
+          <tbody>
+            <tr>
+              <td>
+                <strong>
+                  <i class="fas fa-check-circle me-1 text-success"></i> Activation Status:
+                </strong>
+              </td>
+              <td>
+                <span class="badge bg-success">{{ activation_status|title }}</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>
+                  <i class="fas fa-star me-1 text-warning"></i> Rank:
+                </strong>
+              </td>
+              <td>
+                <span class="badge bg-warning text-dark">{{ user_profile.rank }}</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>
+                  <i class="fas fa-clock me-1 text-info"></i> Last Login:
+                </strong>
+              </td>
+              <td>
+                <span class="badge bg-info">{{ last_login|date:"M d, Y H:i" }}</span>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <strong>
+                  <i class="fas fa-calendar-alt me-1 text-primary"></i> Member Since:
+                </strong>
+              </td>
+              <td>
+                <span class="badge bg-primary">{{ date_joined|date:"M d, Y" }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 7. Income Chart (referral link removed from here) -->
+<div class="row g-3 px-3 mt-4">
+  <div class="col-md-12">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-white fw-semibold">
+        <i class="fas fa-chart-bar me-1"></i> Income Statistics
+      </div>
+      <div class="card-body">
+        <canvas id="incomeChart" width="400" height="60"></canvas>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+          var ctx = document.getElementById("incomeChart").getContext("2d");
+          var incomeChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+              labels: [
+                "Earnings",
+                "Withdrawals",
+                "Expenses",
+                "Balance",
+                "Referral",
+                "Retail",
+                "Leadership",
+                "Matching"
+              ],
+              datasets: [
+                {
+                  label: "Amount in $",
+                  data: [
+                    {{ user_profile.total_earnings }},
+                    {{ user_profile.total_withdrawals }},
+                    {{ user_profile.total_expenses }},
+                    {{ user_profile.balance }},
+                    {{ user_profile.referral_earnings }},
+                    {{ user_profile.retail_bonus }},
+                    {{ user_profile.leadership_bonus }},
+                    {{ user_profile.matching_bonus }}
+                  ],
+                  backgroundColor: [
+                    "rgba(54, 162, 235, 0.7)",
+                    "rgba(255, 99, 132, 0.7)",
+                    "rgba(75, 192, 192, 0.7)",
+                    "rgba(153, 102, 255, 0.7)",
+                    "rgba(46, 86, 98, 0.7)",
+                    "rgba(108, 117, 125, 0.7)",
+                    "rgba(33, 37, 41, 0.7)",
+                    "rgba(111, 66, 193, 0.7)"
+                  ],
+                  borderColor: [
+                    "rgba(54, 162, 235, 1)",
+                    "rgba(255, 99, 132, 1)",
+                    "rgba(75, 192, 192, 1)",
+                    "rgba(153, 102, 255, 1)",
+                    "rgba(46, 86, 98, 1)",
+                    "rgba(108, 117, 125, 1)",
+                    "rgba(33, 37, 41, 1)",
+                    "rgba(111, 66, 193, 1)"
+                  ],
+                  borderWidth: 1
+                }
+              ]
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              },
+              plugins: {
+                legend: {
+                  labels: {
+                    font: {
+                      size: 14
+                    }
+                  }
+                }
+              }
+            }
+          });
+        </script>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 4. Admin News Section (full-width) -->
+<div class="row my-4">
+  <div class="col-12">
+    <div class="card shadow-sm">
+      <div class="card-header bg-danger text-white fw-semibold">
+        <i class="bi bi-broadcast me-2"></i> Latest News
+      </div>
+      <div class="card-body text-center">
+        {% if news.youtube_video_url %}
+          <iframe src="{{ news.youtube_video_url }}" width="100%" height="300px" allowfullscreen></iframe>
+        {% elif news.image %}
+          <img src="{{ news.image.url }}" class="img-fluid rounded" alt="News">
+        {% else %}
+          <p class="text-muted">No news available.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /col main content -->
+</div><!-- /row -->
+</div><!-- /container-fluid -->
+
+<!-- Additional Custom Styling -->
+<style>
+  /* Overall body background styling */
+  body {
+    background-image: url('{% static "images/withdraw.jpeg" %}');
+    background-size: cover;
+    font-family: "Poppins", sans-serif;
+    color: #333;
+  }
+
+  /* Stats cards (row of 4 at the top) */
+  .stats-card {
+    border-radius: 10px;
+    background-color: #fff;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .stats-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Card header styling */
+  .card-header {
+    border-bottom: none;
+    background-color: #fff !important;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+
+  /* Example shadow for the top navbar */
+  .navbar {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Remove bullet from list-group items */
+  .list-group-item {
+    border: none;
+  }
+
+  /* Custom button styling */
+  .btn-outline-primary {
+    border-color: #007bff;
+    color: #007bff;
+  }
+
+  .btn-outline-primary:hover {
+    background-color: #007bff;
+    color: #fff;
+  }
+
+  /* Custom input styling */
+  .form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+  }
+
+  /* Custom alert styling */
+  .alert {
+    border-radius: 5px;
+  }
+
+  /* Custom badge styling */
+  .badge {
+    font-size: 0.9rem;
+    padding: 0.5em 0.75em;
+  }
+</style>
+{% endblock %}
